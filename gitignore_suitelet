@@ -1,12 +1,14 @@
-# Environment & credentials
+# Credentials & environment
 .env
 .env.*
 *.env
 
-# NetSuite deployment config (may contain account IDs)
+# SDF project files (contain account-specific paths and IDs)
 deploy.xml
 manifest.xml
-*.json
+suitecloud.config.js
+.sdfcli
+*.xml
 
 # IDE
 .vscode/
@@ -18,6 +20,5 @@ manifest.xml
 .DS_Store
 Thumbs.db
 
-# SDF project files (contain account-specific paths)
-.sdfcli
-suitecloud.config.js
+# Logs
+*.log
