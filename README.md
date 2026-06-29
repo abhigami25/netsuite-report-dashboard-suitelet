@@ -6,6 +6,15 @@ Replaces the need to build separate report views for each saved search. One scri
 
 ---
 
+## Files
+
+| File | Type | Purpose |
+|---|---|---|
+| `report_dashboard_sl.js` | Suitelet | Main dashboard — renders saved searches as interactive HTML |
+| `report_dashboard_scheduler.js` | Scheduled Script | Nightly runner — sends due email subscriptions |
+
+---
+
 ## What It Does
 
 ### Data loading
@@ -31,7 +40,7 @@ Replaces the need to build separate report views for each saved search. One scri
 ### Named views
 - Save/load named view configs (sort, group, column order/visibility/pin, KPIs, conditional formatting rules, pivot config, filters, overrides)
 - Per-user private views + admin-shared presets (admin role only)
-- Stored in a custom record (`customrecord_report_view`)
+- Stored in custom record `customrecord_report_view`
 
 ### Search filters panel
 - Editable filters derived from the saved search's `filterExpression`
@@ -74,12 +83,12 @@ Replaces the need to build separate report views for each saved search. One scri
 - PDF via BFO renderer (proportional column widths, logo header, page footer)
 - Email PDF and/or CSV to comma-separated recipients (modal)
 
-### Scheduled subscriptions
-- Per-user scheduled email subscriptions stored in a custom record (`customrecord_report_subscription`)
+### Scheduled subscriptions (`report_dashboard_scheduler.js`)
+- Per-user scheduled email subscriptions stored in custom record `customrecord_report_subscription`
 - Daily / Weekly / Monthly; configurable day + time
 - PDF / CSV / both formats
-- Saves current view config with each subscription
-- Scheduler: separate Scheduled Script (nightly runner)
+- Saves current view config (filters, sort, column state) with each subscription
+- Runs nightly via Scheduled Script; governance-aware, stops safely if limits approach
 
 ---
 
@@ -88,7 +97,7 @@ Replaces the need to build separate report views for each saved search. One scri
 ```
 Browser
   │
-  ├── GET  ?searchId=XXXX  →  Suitelet (server-side)
+  ├── GET  ?searchId=XXXX  →  report_dashboard_sl.js (Suitelet)
   │                               │
   │                               ├── File Cabinet cache check (30 min TTL)
   │                               ├── SuiteQL saved search run (runPaged)
@@ -101,68 +110,96 @@ Browser
         ├── Column panel, named views, conditional formatting
         ├── Pivot mode (client-side aggregation)
         └── Period compare (two result sets merged client-side)
+
+Nightly
+  report_dashboard_scheduler.js
+        ├── Loads all active subscriptions from customrecord_report_subscription
+        ├── Checks frequency / day / last_sent to determine what's due
+        ├── Runs saved search with saved view config (filters, sort, columns)
+        └── Emails PDF and/or CSV to recipients
 ```
 
 ---
 
-## Technical notes
+## Technical Notes
 
 **Rhino engine constraints** — NetSuite server scripts run on Rhino 2.1. No spread operator, no nullish coalescing (`??`), no optional chaining (`?.`). All regex uses `new RegExp(...)` syntax.
 
 **Data transport** — all data passed server → client via `jsonB64()` (base64-encoded JSON inside `<script>` blocks). Never breaks HTML parsing regardless of data content.
 
-**String safety** — `escJs()` for HTML-escaping client strings; `safeJson()` escapes `\u2028`, `\u2029`, and `</script` sequences in inline script JSON; `replaceAll()` used for placeholder substitution to avoid `$`-pattern issues in `.replace()`.
+**String safety** — `escJs()` for HTML-escaping client strings; `safeJson()` escapes `\u2028`, `\u2029`, and `</script` sequences in inline script JSON.
 
-**Script/deploy ID extraction** — `getBase()` uses regex against `req.url` to reliably extract script and deploy IDs for use in AJAX POST targets (works correctly even on POST requests where `req.url` structure differs).
+**Script/deploy ID extraction** — `getBase()` parses `req.url` to extract script and deploy IDs for AJAX POST targets — works correctly on both GET and POST requests.
+
+**Governance handling** — `runPaged` primary path with `getRange` fallback and `run().each()` last resort. Scheduler stops processing subscriptions when remaining usage drops below threshold.
 
 ---
 
 ## Setup
 
-### 1. Upload the script
-Upload `report_dashboard_sl.js` to your NetSuite File Cabinet.
+### 1. Configure the Suitelet
 
-### 2. Create the Suitelet script record
-- Script Type: `Suitelet`
-- Script File: select the uploaded file
-- Note the Script ID and Deployment ID
+Open `report_dashboard_sl.js` and set:
+
+```js
+const LOGO_URL     = '';   
+const COMPANY      = '';  
+const CACHE_FOLDER = 0;   
+```
+
+### 2. Upload both files to File Cabinet
+
+Upload `report_dashboard_sl.js` and `report_dashboard_scheduler.js` to your File Cabinet.
 
 ### 3. Create custom record types
 
 **View storage** (`customrecord_report_view`):
-| Field | Type |
+
+| Field ID | Type |
 |---|---|
-| `custrecord_view_search_id` | Free-form text |
-| `custrecord_view_name` | Free-form text |
-| `custrecord_view_config` | Long text |
-| `custrecord_view_owner` | Employee (lookup) |
-| `custrecord_view_shared` | Checkbox |
+| `custrecord_ddv_search` | Free-form text |
+| `custrecord_ddv_search_label` | Free-form text |
+| `custrecord_ddv_user` | Employee (lookup) |
+| `custrecord_ddv_shared` | Checkbox |
+| `custrecord_ddv_config` | Long text |
 
 **Subscription storage** (`customrecord_report_subscription`):
-| Field | Type |
+
+| Field ID | Type |
 |---|---|
-| `custrecord_sub_search_id` | Free-form text |
-| `custrecord_sub_owner` | Employee (lookup) |
-| `custrecord_sub_frequency` | List (daily/weekly/monthly) |
-| `custrecord_sub_day` | Integer |
-| `custrecord_sub_time` | Free-form text |
-| `custrecord_sub_format` | List (pdf/csv/both) |
-| `custrecord_sub_recipients` | Long text |
-| `custrecord_sub_view_config` | Long text |
+| `custrecord_dds_search_id` | Free-form text |
+| `custrecord_dds_name` | Free-form text |
+| `custrecord_dds_recipients` | Long text |
+| `custrecord_dds_frequency` | Free-form text |
+| `custrecord_dds_day` | Free-form text |
+| `custrecord_dds_time` | Free-form text |
+| `custrecord_dds_format` | Free-form text |
+| `custrecord_dds_config` | Long text |
+| `custrecord_dds_active` | Checkbox |
+| `custrecord_dds_user` | Employee (lookup) |
+| `custrecord_dds_last_sent` | Date/Time |
 
-### 4. Create the Scheduler script record (for subscriptions)
-- Script Type: `Scheduled`
+### 4. Create Script records
+
+**Suitelet:**
+- Script Type: `Suitelet`
+- Script File: `report_dashboard_sl.js`
+- Deploy and note Script ID + Deployment ID
+
+**Scheduler:**
+- Script Type: `Scheduled Script`
 - Script File: `report_dashboard_scheduler.js`
-- Schedule: nightly
+- Schedule: nightly (e.g. 1:00 AM daily)
 
-### 5. Deploy and use
-Navigate to the Suitelet URL with your search ID:
+### 5. Use
+
+Navigate to:
 ```
 /app/site/hosting/scriptlet.nl?script=YOUR_SCRIPT_ID&deploy=YOUR_DEPLOY_ID&searchId=YOUR_SAVED_SEARCH_ID
 ```
 
-Optional params:
-- `nocache=1` — bypass File Cabinet cache
+Optional URL params:
+- `nocache=1` — bypass File Cabinet cache, force fresh search run
 - `mode=detail` — force detail view on summary searches
 
 ---
@@ -171,20 +208,20 @@ Optional params:
 
 | Component | Technology |
 |---|---|
-| Script type | SuiteScript 2.x Suitelet |
-| Data query | SuiteQL (N/query) |
+| Suitelet | SuiteScript 2.1 |
+| Scheduler | SuiteScript 2.1 Scheduled Script |
+| Data query | NetSuite Saved Search (N/search) |
 | Cache | NetSuite File Cabinet |
 | PDF export | BFO Report Generator (NetSuite built-in) |
-| Subscriptions | Custom record + Scheduled Script |
-| Client UI | Vanilla JS (Rhino-safe ES5) |
+| Client UI | Vanilla JS (ES5, Rhino-safe) |
 
 ---
 
 ## Skills Demonstrated
 
-- Advanced SuiteScript 2.x development (Suitelet, Scheduled Script, SuiteQL)
+- Advanced SuiteScript 2.x (Suitelet + Scheduled Script)
 - Client-side data pipeline: sort, filter, group, paginate, pivot — no page reload
 - NetSuite File Cabinet caching strategy
-- Custom record design for persistent user preferences
-- Rhino engine constraints and ES5-compatible JavaScript patterns
-- Supply chain reporting: period comparison, conditional alerting, KPI tracking
+- Custom record design for persistent user state
+- Rhino engine constraints and ES5-compatible patterns
+- Supply chain reporting: period comparison, KPI tracking, conditional alerting, scheduled delivery
