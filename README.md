@@ -100,7 +100,7 @@ Browser
   ├── GET  ?searchId=XXXX  →  report_dashboard_sl.js (Suitelet)
   │                               │
   │                               ├── File Cabinet cache check (30 min TTL)
-  │                               ├── SuiteQL saved search run (runPaged)
+  │                               ├── Saved search run (runPaged)
   │                               └── JSON → base64 → inline <script> block
   │
   ├── POST (filter override)  →  Suitelet re-runs with new filterExpression
@@ -123,15 +123,17 @@ Nightly
 
 ## Technical Notes
 
-**Rhino engine constraints** — NetSuite server scripts run on Rhino 2.1. No spread operator, no nullish coalescing (`??`), no optional chaining (`?.`). All regex uses `new RegExp(...)` syntax.
+**Data transport** — all data passed server → client via `jsonB64()` (base64-encoded JSON inside `<script>` blocks). Raw JSON breaks the moment cell data contains quotes, `</script>` tags, or Unicode line terminators (`\u2028`, `\u2029`). Base64 encoding produces pure ASCII output — nothing can break the HTML parser regardless of cell content.
 
-**Data transport** — all data passed server → client via `jsonB64()` (base64-encoded JSON inside `<script>` blocks). Never breaks HTML parsing regardless of data content.
+**String safety** — `safeJson()` escapes `\u2028`, `\u2029`, and `</script` sequences in inline script JSON. `escJs()` handles HTML-escaping of client-side strings.
 
-**String safety** — `escJs()` for HTML-escaping client strings; `safeJson()` escapes `\u2028`, `\u2029`, and `</script` sequences in inline script JSON.
+**Search execution fallback chain** — `runPaged` is the primary path. If it fails mid-run, falls back to `getRange` loop (no row cap unlike `run().each()`). If both fail, `run().each()` is the last resort (capped at ~4,000 rows). Each stage logs governance usage.
 
 **Script/deploy ID extraction** — `getBase()` parses `req.url` to extract script and deploy IDs for AJAX POST targets — works correctly on both GET and POST requests.
 
-**Governance handling** — `runPaged` primary path with `getRange` fallback and `run().each()` last resort. Scheduler stops processing subscriptions when remaining usage drops below threshold.
+**Governance handling** — scheduler stops processing subscriptions when remaining script usage drops below threshold (`GOV_STOP = 2000`). Suitelet stops fetching rows when usage drops below `GOV_MIN = 500`.
+
+**PDF column widths** — BFO renderer does not reliably honor percentage-based column widths. Column widths are calculated in points based on content length sampling (first 50 rows), distributed proportionally across the page width.
 
 ---
 
@@ -142,14 +144,14 @@ Nightly
 Open `report_dashboard_sl.js` and set:
 
 ```js
-const LOGO_URL     = '';   
-const COMPANY      = '';  
-const CACHE_FOLDER = 0;   
+const LOGO_URL     = '';   // Your logo URL, or leave blank
+const COMPANY      = '';   // Your company name, or leave blank
+const CACHE_FOLDER = 0;    // Internal ID of a File Cabinet folder you own
 ```
 
 ### 2. Upload both files to File Cabinet
 
-Upload `report_dashboard_sl.js` and `report_dashboard_scheduler.js` to your File Cabinet.
+Upload `report_dashboard_sl.js` and `report_dashboard_scheduler.js` to your NetSuite File Cabinet.
 
 ### 3. Create custom record types
 
@@ -183,13 +185,15 @@ Upload `report_dashboard_sl.js` and `report_dashboard_scheduler.js` to your File
 
 **Suitelet:**
 - Script Type: `Suitelet`
+- API Version: `2.1`
 - Script File: `report_dashboard_sl.js`
 - Deploy and note Script ID + Deployment ID
 
 **Scheduler:**
 - Script Type: `Scheduled Script`
+- API Version: `2.1`
 - Script File: `report_dashboard_scheduler.js`
-- Schedule: nightly (e.g. 1:00 AM daily)
+- Schedule: nightly
 
 ### 5. Use
 
@@ -213,15 +217,15 @@ Optional URL params:
 | Data query | NetSuite Saved Search (N/search) |
 | Cache | NetSuite File Cabinet |
 | PDF export | BFO Report Generator (NetSuite built-in) |
-| Client UI | Vanilla JS (ES5, Rhino-safe) |
+| Client UI | Vanilla JS |
 
 ---
 
 ## Skills Demonstrated
 
-- Advanced SuiteScript 2.x (Suitelet + Scheduled Script)
+- SuiteScript 2.1 (Suitelet + Scheduled Script)
 - Client-side data pipeline: sort, filter, group, paginate, pivot — no page reload
 - NetSuite File Cabinet caching strategy
+- Safe server → client data transport (base64 JSON encoding)
 - Custom record design for persistent user state
-- Rhino engine constraints and ES5-compatible patterns
 - Supply chain reporting: period comparison, KPI tracking, conditional alerting, scheduled delivery
