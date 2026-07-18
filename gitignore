@@ -1,0 +1,25 @@
+# Credentials & environment
+.env
+.env.*
+*.env
+
+# SDF account-specific config (generated locally, not shareable)
+suitecloud.config.js
+.sdfcli
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# SuiteCloud CLI
+.suitecloud-sdk/
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

@@ -1,0 +1,83 @@
+<customrecordtype scriptid="customrecord_dashboard_subscription">
+  <recordname>Dashboard Subscription</recordname>
+  <includename>F</includename>
+  <showid>F</showid>
+  <shownotes>F</shownotes>
+  <showcreateddate>F</showcreateddate>
+  <showlastmodified>T</showlastmodified>
+  <allowinlineediting>F</allowinlineediting>
+  <allowinlinedeleting>F</allowinlinedeleting>
+  <allowquickadd>F</allowquickadd>
+  <isinactive>F</isinactive>
+  <allowquicksearch>F</allowquicksearch>
+  <accesstype>USEPERMISSIONLIST</accesstype>
+  <customrecordcustomfields>
+    <customrecordcustomfield scriptid="custrecord_dds_search_id">
+      <fieldtype>FREEFORMTEXT</fieldtype>
+      <label>Search ID</label>
+      <ismandatory>F</ismandatory>
+      <storevalue>T</storevalue>
+    </customrecordcustomfield>
+    <customrecordcustomfield scriptid="custrecord_dds_name">
+      <fieldtype>FREEFORMTEXT</fieldtype>
+      <label>Subscription Name</label>
+      <ismandatory>F</ismandatory>
+      <storevalue>T</storevalue>
+    </customrecordcustomfield>
+    <customrecordcustomfield scriptid="custrecord_dds_recipients">
+      <fieldtype>TEXTAREA</fieldtype>
+      <label>Recipients</label>
+      <ismandatory>F</ismandatory>
+      <storevalue>T</storevalue>
+    </customrecordcustomfield>
+    <customrecordcustomfield scriptid="custrecord_dds_frequency">
+      <fieldtype>FREEFORMTEXT</fieldtype>
+      <label>Frequency</label>
+      <ismandatory>F</ismandatory>
+      <storevalue>T</storevalue>
+    </customrecordcustomfield>
+    <customrecordcustomfield scriptid="custrecord_dds_day">
+      <fieldtype>FREEFORMTEXT</fieldtype>
+      <label>Day</label>
+      <ismandatory>F</ismandatory>
+      <storevalue>T</storevalue>
+    </customrecordcustomfield>
+    <customrecordcustomfield scriptid="custrecord_dds_time">
+      <fieldtype>FREEFORMTEXT</fieldtype>
+      <label>Time</label>
+      <ismandatory>F</ismandatory>
+      <storevalue>T</storevalue>
+    </customrecordcustomfield>
+    <customrecordcustomfield scriptid="custrecord_dds_format">
+      <fieldtype>FREEFORMTEXT</fieldtype>
+      <label>Format</label>
+      <ismandatory>F</ismandatory>
+      <storevalue>T</storevalue>
+    </customrecordcustomfield>
+    <customrecordcustomfield scriptid="custrecord_dds_config">
+      <fieldtype>TEXTAREA</fieldtype>
+      <label>Config JSON</label>
+      <ismandatory>F</ismandatory>
+      <storevalue>T</storevalue>
+    </customrecordcustomfield>
+    <customrecordcustomfield scriptid="custrecord_dds_active">
+      <fieldtype>CHECKBOX</fieldtype>
+      <label>Active</label>
+      <ismandatory>F</ismandatory>
+      <defaultvalue>T</defaultvalue>
+      <storevalue>T</storevalue>
+    </customrecordcustomfield>
+    <customrecordcustomfield scriptid="custrecord_dds_user">
+      <fieldtype>FREEFORMTEXT</fieldtype>
+      <label>User</label>
+      <ismandatory>F</ismandatory>
+      <storevalue>T</storevalue>
+    </customrecordcustomfield>
+    <customrecordcustomfield scriptid="custrecord_dds_last_sent">
+      <fieldtype>DATETIMETZ</fieldtype>
+      <label>Last Sent</label>
+      <ismandatory>F</ismandatory>
+      <storevalue>T</storevalue>
+    </customrecordcustomfield>
+  </customrecordcustomfields>
+</customrecordtype>

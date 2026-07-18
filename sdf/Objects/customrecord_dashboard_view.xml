@@ -1,0 +1,47 @@
+<customrecordtype scriptid="customrecord_dashboard_view">
+  <recordname>Dashboard View</recordname>
+  <includename>F</includename>
+  <showid>F</showid>
+  <shownotes>F</shownotes>
+  <showcreateddate>F</showcreateddate>
+  <showlastmodified>F</showlastmodified>
+  <allowinlineediting>F</allowinlineediting>
+  <allowinlinedeleting>F</allowinlinedeleting>
+  <allowquickadd>F</allowquickadd>
+  <isinactive>F</isinactive>
+  <allowquicksearch>F</allowquicksearch>
+  <accesstype>USEPERMISSIONLIST</accesstype>
+  <customrecordcustomfields>
+    <customrecordcustomfield scriptid="custrecord_ddv_search">
+      <fieldtype>FREEFORMTEXT</fieldtype>
+      <label>Search ID</label>
+      <ismandatory>F</ismandatory>
+      <storevalue>T</storevalue>
+    </customrecordcustomfield>
+    <customrecordcustomfield scriptid="custrecord_ddv_search_label">
+      <fieldtype>FREEFORMTEXT</fieldtype>
+      <label>Search Label</label>
+      <ismandatory>F</ismandatory>
+      <storevalue>T</storevalue>
+    </customrecordcustomfield>
+    <customrecordcustomfield scriptid="custrecord_ddv_user">
+      <fieldtype>FREEFORMTEXT</fieldtype>
+      <label>User</label>
+      <ismandatory>F</ismandatory>
+      <storevalue>T</storevalue>
+    </customrecordcustomfield>
+    <customrecordcustomfield scriptid="custrecord_ddv_shared">
+      <fieldtype>CHECKBOX</fieldtype>
+      <label>Shared</label>
+      <ismandatory>F</ismandatory>
+      <defaultvalue>F</defaultvalue>
+      <storevalue>T</storevalue>
+    </customrecordcustomfield>
+    <customrecordcustomfield scriptid="custrecord_ddv_config">
+      <fieldtype>TEXTAREA</fieldtype>
+      <label>Config JSON</label>
+      <ismandatory>F</ismandatory>
+      <storevalue>T</storevalue>
+    </customrecordcustomfield>
+  </customrecordcustomfields>
+</customrecordtype>

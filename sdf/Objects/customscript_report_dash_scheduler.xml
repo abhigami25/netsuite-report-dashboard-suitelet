@@ -1,0 +1,15 @@
+<scheduledscript scriptid="customscript_report_dash_scheduler">
+  <name>Report Dashboard Scheduler</name>
+  <scriptfile>[/SuiteScripts/ReportDashboard/report_dashboard_scheduler.js]</scriptfile>
+  <notifyowner>F</notifyowner>
+  <status>RELEASED</status>
+  <description>Nightly runner — checks all active dashboard subscriptions and sends due emails (PDF / CSV / both).</description>
+  <scriptdeployments>
+    <scriptdeployment scriptid="customdeploy_report_dash_scheduler">
+      <title>Report Dashboard Scheduler</title>
+      <status>RELEASED</status>
+      <isdeployed>T</isdeployed>
+      <loglevel>AUDIT</loglevel>
+    </scriptdeployment>
+  </scriptdeployments>
+</scheduledscript>

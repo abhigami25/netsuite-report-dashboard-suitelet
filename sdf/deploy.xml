@@ -1,0 +1,8 @@
+<deploy>
+  <configuration>
+    <path>~/Objects/*</path>
+  </configuration>
+  <files>
+    <path>~/FileCabinet/SuiteScripts/ReportDashboard/*</path>
+  </files>
+</deploy>

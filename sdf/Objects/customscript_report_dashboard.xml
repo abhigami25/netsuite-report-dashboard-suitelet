@@ -1,0 +1,16 @@
+<suitelet scriptid="customscript_report_dashboard">
+  <name>Report Dashboard</name>
+  <scriptfile>[/SuiteScripts/ReportDashboard/report_dashboard_sl.js]</scriptfile>
+  <notifyowner>F</notifyowner>
+  <status>RELEASED</status>
+  <description>Universal saved search dashboard — interactive reports with pivot tables, conditional formatting, drill-down, export, and scheduled subscriptions.</description>
+  <scriptdeployments>
+    <scriptdeployment scriptid="customdeploy_report_dashboard">
+      <title>Report Dashboard</title>
+      <status>RELEASED</status>
+      <isdeployed>T</isdeployed>
+      <loglevel>AUDIT</loglevel>
+      <allroles>T</allroles>
+    </scriptdeployment>
+  </scriptdeployments>
+</suitelet>
